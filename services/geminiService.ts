@@ -1,3 +1,4 @@
+
 import { GoogleGenAI, Type } from "@google/genai";
 import type { QuizData, ReportData, WorkoutPlanApiResponse, PendingWorkoutPlan, ChatMessage, WorkoutGuideDraft, ExtractedReportData } from '../types';
 import { workoutDatabase } from '../data/workoutDatabase';
@@ -24,9 +25,20 @@ export const generateAssessmentReport = async (quizData: QuizData): Promise<Repo
             numbers: {
                 type: Type.OBJECT,
                 properties: {
-                    current_intake_kcal: { type: Type.NUMBER },
-                    current_burn_kcal: { type: Type.NUMBER },
-                    calorie_gap_kcal: { type: Type.NUMBER },
+                    current_maintenance_calories: { type: Type.NUMBER, description: "Calculated TDEE (Total Daily Energy Expenditure) - this is their estimated current average intake." },
+                    daily_calorie_deficit_needed: { type: Type.NUMBER, description: "Mathematical deficit needed to reach target weight in target weeks (7700kcal per kg of fat)." },
+                    target_intake_kcal: { type: Type.NUMBER, description: "Recommended daily intake (TDEE - Deficit). Ensure it is safe (min 1200/1500)." },
+                    target_burn_per_day_activity: { type: Type.NUMBER, description: "Calories to burn via ADDED exercise (cardio/steps) to support the deficit." },
+                },
+            },
+            timeline: {
+                type: Type.OBJECT,
+                properties: {
+                    excess_fat_kg: { type: Type.NUMBER, description: "Difference between current weight and target weight." },
+                    weeks_to_goal: { type: Type.NUMBER },
+                    projected_loss_per_week_kg: { type: Type.NUMBER },
+                    is_timeline_realistic: { type: Type.BOOLEAN },
+                    adjusted_timeline_weeks: { type: Type.NUMBER, description: "If original timeline requires >1000kcal deficit, provide a realistic timeline (approx 0.5-1kg/week)." },
                 },
             },
             nutrition_targets: {
@@ -48,6 +60,7 @@ export const generateAssessmentReport = async (quizData: QuizData): Promise<Repo
                     estimated_tbw_percent: { type: Type.NUMBER },
                     tbw_typical_band: { type: Type.ARRAY, items: { type: Type.NUMBER } },
                     tbw_status: { type: Type.STRING },
+                    visual_analysis_notes: { type: Type.STRING, description: "Specific observations from image (muscle definition, posture, fat distribution) if provided." },
                 },
             },
             flags: {
@@ -62,33 +75,94 @@ export const generateAssessmentReport = async (quizData: QuizData): Promise<Repo
                 },
             },
             methodology: { type: Type.ARRAY, items: { type: Type.STRING } },
-            report_markdown: { type: Type.STRING, description: "A detailed, motivational report in Markdown format covering all key areas." },
+            report_markdown: { type: Type.STRING, description: "A detailed, motivational report in Markdown format explaining the math and plan." },
         },
-        required: ["numbers", "nutrition_targets", "body_comp", "flags", "methodology", "report_markdown"]
+        required: ["numbers", "timeline", "nutrition_targets", "body_comp", "flags", "methodology", "report_markdown"]
     };
 
     try {
-        const prompt = `
-            Act as a certified personal trainer and nutritionist.
-            Analyze this user’s data to generate a complete fitness assessment.
-            You MUST populate ALL fields in the provided JSON schema accurately based on the user's data.
-            - For 'bf_status' and 'tbw_status', use only "below", "within", or "above".
-            - For 'flags.severity', use only "low", "medium", or "high".
-            - 'carbs_g_range' and 'fats_g_range' should be an array of two numbers, e.g., [150, 200].
-            - Generate a comprehensive, professional, and motivational report in markdown format for the 'report_markdown' field.
-            The markdown report should be well-structured and cover: 
-            1) A friendly introduction and summary of their main goal.
-            2) A breakdown of their daily nutrition targets.
-            3) An analysis of their body composition.
-            4) An explanation of their daily calorie balance.
-            5) A clear list of key issues or areas to focus on (flags).
+        const promptText = `
+            Act as an elite biometric scientist and master nutritionist.
+            Your goal is to perform a high-precision analysis of the user to generate a transformation plan.
 
-            User Data: ${JSON.stringify(quizData, null, 2)}
+            **PART 1: THE INPUTS**
+            - Weight: ${quizData.currentWeight}kg
+            - Height: ${quizData.height}cm
+            - Age: ${quizData.age}
+            - Gender: ${quizData.gender}
+            - Activity Level: ${quizData.dailyActivity}
+            - Gym Frequency: ${quizData.gymDaysPerWeek} days/week
+            - Goal: ${quizData.goal}
+            - Target: ${quizData.targetWeight}kg in ${quizData.targetPeriodWeeks} weeks.
+
+            **PART 2: THE MATH (Execute Step-by-Step)**
+            
+            1. **Calculate BMR (Mifflin-St Jeor Equation)**:
+               - Men: (10 × weight) + (6.25 × height) - (5 × age) + 5
+               - Women: (10 × weight) + (6.25 × height) - (5 × age) - 161
+            
+            2. **Calculate TDEE (Current Maintenance/Average Intake)**:
+               - Apply Activity Multiplier to BMR:
+                 - Sedentary: 1.2
+                 - Lightly Active: 1.375
+                 - Moderately Active: 1.55
+                 - Very Active: 1.725
+               *CRITICAL: This value 'current_maintenance_calories' represents their ESTIMATED CURRENT DAILY INTAKE if they are maintaining weight.*
+
+            3. **The Gap Analysis (Excess Fat & Deficit)**:
+               - 'excess_fat_kg' = Current Weight - Target Weight. (If negative/gaining muscle, set to 0).
+               - Total Calorie Gap = excess_fat_kg * 7700 kcal (approx energy in 1kg fat).
+               - 'daily_calorie_deficit_needed' = Total Calorie Gap / (Target Weeks * 7).
+
+            4. **Realism Check**:
+               - Max Safe Deficit: ~1000 kcal/day OR 1% of body weight/week.
+               - Min Safe Intake: 1200 kcal (Women), 1500 kcal (Men).
+               - If 'daily_calorie_deficit_needed' > 1000 OR (TDEE - Deficit) < Min Safe Intake:
+                 - Set 'is_timeline_realistic' = FALSE.
+                 - Calculate 'adjusted_timeline_weeks' based on a safe 500-750 kcal daily deficit.
+                 - Re-calculate targets based on the SAFE deficit, not the requested one.
+
+            5. **The Plan (Intake vs. Burn)**:
+               - 'target_intake_kcal': TDEE - Safe Deficit.
+               - 'target_burn_per_day_activity': Suggest a value (e.g., 300-500) for *additional* exercise burn to assist the deficit.
+               - If Goal is Muscle Gain: Set Intake to TDEE + 250-500 surplus.
+
+            **PART 3: IMAGE ANALYSIS (Visual Intelligence)**
+            - **IF IMAGE PROVIDED:**
+              - Analyze body composition. Does the user have high muscle mass? (BMI skews high for muscular individuals).
+              - If muscular, INCREASE the estimated TDEE by 5-10% (muscle burns more calories).
+              - Visually estimate Body Fat %. Use this for 'estimated_bf_percent' instead of generic formulas.
+              - Note specific areas (e.g., "Visceral fat detected," "Good shoulder development") in 'visual_analysis_notes'.
+
+            **PART 4: REPORT GENERATION**
+            - Explain the numbers clearly: "To lose X kg in Y weeks, you need a daily gap of Z calories."
+            - Break down the gap: "We recommend creating this gap through A calories less food and B calories more movement."
+            - Be encouraging but strictly scientific.
+
+            **USER DATA:**
+            ${JSON.stringify(quizData, null, 2)}
         `;
+
+        const requestParts: { text?: string; inlineData?: { mimeType: string, data: string } }[] = [{ text: promptText }];
+        
+        // Add image to the request if it exists
+        if (quizData.bodyImage) {
+            const match = quizData.bodyImage.match(/^data:(.+);base64,(.+)$/);
+            if (match) {
+                const mimeType = match[1];
+                const base64Data = match[2];
+                requestParts.push({
+                    inlineData: {
+                        mimeType,
+                        data: base64Data,
+                    },
+                });
+            }
+        }
 
         const response = await ai.models.generateContent({
             model: 'gemini-2.5-flash',
-            contents: prompt,
+            contents: { parts: requestParts },
             config: {
                 responseMimeType: "application/json",
                 responseSchema: reportSchema,
@@ -100,16 +174,23 @@ export const generateAssessmentReport = async (quizData: QuizData): Promise<Repo
 
     } catch (err) {
         console.error("Gemini API Error in generateAssessmentReport:", err);
-        // Custom error for JSON parsing issues
         if (err instanceof SyntaxError) {
              throw new Error("AI_JSON_PARSE_ERROR: Failed to parse the structured report from the AI.");
         }
-        // Return an error message within the expected structure for other errors
         return {
             report_markdown: "⚠️ # Failed to generate report.\n\nThe AI service may be temporarily unavailable or encountered an issue processing your data. Please try again later.",
-            numbers: { current_intake_kcal: 0, current_burn_kcal: 0, calorie_gap_kcal: 0 },
+            numbers: { current_maintenance_calories: 0, daily_calorie_deficit_needed: 0, target_intake_kcal: 0, target_burn_per_day_activity: 0 },
+            timeline: { excess_fat_kg: 0, weeks_to_goal: 0, projected_loss_per_week_kg: 0, is_timeline_realistic: true },
             nutrition_targets: { recommended_calories_kcal: 0, protein_g: 0, water_l: 0, carbs_g_range: null, fats_g_range: null },
-            body_comp: { estimated_bf_percent: 0, bf_ideal_band: [0, 0], bf_status: "within", estimated_tbw_percent: 0, tbw_typical_band: [0, 0], tbw_status: "within" },
+            body_comp: { 
+                estimated_bf_percent: 0, 
+                bf_ideal_band: [0, 0], 
+                bf_status: "within", 
+                estimated_tbw_percent: 0, 
+                tbw_typical_band: [0, 0],
+                tbw_status: "within",
+                visual_analysis_notes: "Analysis failed." 
+            },
             flags: [],
             methodology: [],
         };

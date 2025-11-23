@@ -6,7 +6,15 @@ import { logout } from '../services/firebase';
 import { ArrowLeft, LogOut, FileText, Dumbbell, TrendingUp, Edit } from 'lucide-react';
 import { getPendingPlans } from '../services/planService';
 
-const InfoCard = ({ icon: Icon, title, children, ctaLink, ctaText }: { icon: React.ElementType, title: string, children: React.ReactNode, ctaLink: string, ctaText: string }) => (
+interface InfoCardProps {
+    icon: React.ElementType;
+    title: string;
+    children: React.ReactNode;
+    ctaLink: string;
+    ctaText: string;
+}
+
+const InfoCard: React.FC<InfoCardProps> = ({ icon: Icon, title, children, ctaLink, ctaText }) => (
     <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-6 flex flex-col justify-between h-full">
         <div>
             <div className="flex items-center gap-3 mb-4">

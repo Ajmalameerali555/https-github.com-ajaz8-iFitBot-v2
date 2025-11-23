@@ -37,9 +37,17 @@ export interface Flag {
 
 export interface ReportData {
     numbers: {
-        current_intake_kcal: number;
-        current_burn_kcal: number;
-        calorie_gap_kcal: number;
+        current_maintenance_calories: number; // TDEE
+        daily_calorie_deficit_needed: number;
+        target_intake_kcal: number;
+        target_burn_per_day_activity: number; // Calories to burn via exercise/movement
+    };
+    timeline: {
+        excess_fat_kg: number;
+        weeks_to_goal: number;
+        projected_loss_per_week_kg: number;
+        is_timeline_realistic: boolean;
+        adjusted_timeline_weeks?: number; // If the user's goal is unsafe, suggest this
     };
     nutrition_targets: {
         recommended_calories_kcal: number;
@@ -52,6 +60,7 @@ export interface ReportData {
         estimated_bf_percent: number;
         bf_ideal_band: [number, number];
         bf_status: "below" | "within" | "above";
+        visual_analysis_notes?: string; // Specific findings from image
         estimated_tbw_percent: number;
         tbw_typical_band: [number, number];
         tbw_status: "below" | "within" | "above";

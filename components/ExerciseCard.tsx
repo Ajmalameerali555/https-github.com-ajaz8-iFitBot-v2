@@ -8,13 +8,13 @@ interface ExerciseCardProps {
     onClick: (exercise: LibraryExercise) => void;
 }
 
-const difficultyColorMap = {
+const difficultyColorMap: Record<string, string> = {
     Beginner: 'bg-green-500/80',
     Intermediate: 'bg-yellow-500/80',
     Advanced: 'bg-red-500/80',
 };
 
-export default function ExerciseCard({ exercise, onClick }: ExerciseCardProps) {
+const ExerciseCard: React.FC<ExerciseCardProps> = ({ exercise, onClick }) => {
     const difficultyColor = difficultyColorMap[exercise.difficulty] || 'bg-gray-500/80';
 
     return (
@@ -57,3 +57,5 @@ export default function ExerciseCard({ exercise, onClick }: ExerciseCardProps) {
         </div>
     );
 }
+
+export default ExerciseCard;

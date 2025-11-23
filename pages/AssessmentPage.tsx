@@ -4,6 +4,7 @@ import { useNavigate } from 'react-router-dom';
 import QuizContainer from '../components/quiz/QuizContainer';
 import { AppContext, AuthContext } from '../App';
 import type { QuizData } from '../types';
+import { logToSheet } from '../services/googleSheetService';
 
 export default function AssessmentPage() {
     const { setQuizData } = useContext(AppContext);
@@ -22,6 +23,16 @@ export default function AssessmentPage() {
         };
         
         setQuizData(finalData);
+
+        // Log assessment completion to Google Sheet
+        const summary = `Goal: ${finalData.goal}, Weight: ${finalData.currentWeight}kg, Height: ${finalData.height}cm`;
+        logToSheet({
+            name: finalData.name,
+            email: finalData.email,
+            action: 'Assessment Completed',
+            details: summary
+        });
+
         navigate('/report');
     };
 

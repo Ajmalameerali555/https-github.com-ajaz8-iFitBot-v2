@@ -13,7 +13,7 @@ const WhatsAppIcon = () => (
     </svg>
 );
 
-export default function ContactSupportIcon() {
+const ContactSupportIcon: React.FC = () => {
     const phoneNumber = "971581514436";
     const whatsappUrl = `https://wa.me/${phoneNumber}`;
 
@@ -30,3 +30,5 @@ export default function ContactSupportIcon() {
         </a>
     );
 }
+
+export default ContactSupportIcon;

@@ -3,7 +3,13 @@ import React from 'react';
 import { Link } from 'react-router-dom';
 import { ArrowLeft, Phone, Mail, MapPin, Clock, Star, Dumbbell, Waves, Sparkles, HeartPulse, UserCheck, Music } from 'lucide-react';
 
-const InfoCard = ({ icon: Icon, title, children }: { icon: React.ElementType, title: string, children: React.ReactNode }) => (
+interface InfoCardProps {
+    icon: React.ElementType;
+    title: string;
+    children: React.ReactNode;
+}
+
+const InfoCard: React.FC<InfoCardProps> = ({ icon: Icon, title, children }) => (
     <div className="bg-gray-800/50 border border-gray-700 rounded-lg p-6 flex items-start gap-4">
         <Icon className="w-8 h-8 text-lime-400 mt-1 flex-shrink-0" />
         <div>

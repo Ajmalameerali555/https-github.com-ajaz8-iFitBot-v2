@@ -57,7 +57,7 @@ const AssessmentRecap = ({ plan }: { plan: PendingWorkoutPlan }) => {
     );
 };
 
-const WorkoutDayCard = ({ day }: { day: any }) => (
+const WorkoutDayCard: React.FC<{ day: any }> = ({ day }) => (
     <div className="bg-white border border-gray-200 rounded-lg p-4 h-full flex flex-col space-y-3 text-sm">
         <h4 className="font-bold text-gray-800 text-base">{day.day_name}</h4>
         

@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import { HashRouter, Routes, Route, Navigate } from 'react-router-dom';
 import HomePage from './pages/HomePage';
@@ -11,12 +10,12 @@ import TrainerLoginPage from './pages/TrainerLoginPage';
 import TrainerDashboardPage from './pages/TrainerDashboardPage';
 import MyPlanPage from './pages/MyPlanPage';
 import ProgressPage from './pages/ProgressPage';
-import ProfilePage from './pages/ProfilePage'; // Import the new ProfilePage
+import ProfilePage from './pages/ProfilePage';
 import ContactSupportIcon from './components/ContactSupportIcon';
 import type { QuizData, FirebaseUser, UserProfile } from './types';
 import { auth } from './services/firebase';
-// FIX: Removed 'onAuthStateChanged' from 'firebase/auth' as it is not a valid export in the compat version. It will be called as a method on the auth object.
 import { getUserProfile, createUserProfile, saveUserAssessment } from './services/userService';
+import { logToSheet } from './services/googleSheetService';
 
 export const AuthContext = React.createContext<{
     currentUser: FirebaseUser | null;
@@ -38,7 +37,7 @@ setQuizData: () => {},
 
 const QUIZ_DATA_STORAGE_KEY = 'ifit_latest_quiz_data';
 
-const ProtectedRoute = ({ children }: { children: React.ReactNode }) => {
+const ProtectedRoute = ({ children }: { children?: React.ReactNode }) => {
     const { currentUser, authLoading } = React.useContext(AuthContext);
     if (authLoading) {
         return <div className="min-h-screen bg-gray-900 flex justify-center items-center"><div className="w-8 h-8 border-4 border-lime-500 border-dashed rounded-full animate-spin"></div></div>;
@@ -68,6 +67,19 @@ export default function App() {
                 let profile = await getUserProfile(uid);
                 if (!profile) {
                     profile = await createUserProfile(firebaseUser);
+                    // Log new sign up
+                    logToSheet({
+                        name: displayName || 'Unknown',
+                        email: email || 'No Email',
+                        action: 'New User Sign Up'
+                    });
+                } else {
+                     // Log login
+                     logToSheet({
+                        name: displayName || 'Unknown',
+                        email: email || 'No Email',
+                        action: 'User Login'
+                    });
                 }
                 setUserProfile(profile);
                 setQuizData(profile.latestQuizData || null);
