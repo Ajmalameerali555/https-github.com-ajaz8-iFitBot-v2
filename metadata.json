@@ -1,5 +1,5 @@
 {
-  "name": "iFit",
+  "name": "Copy of iFit",
   "description": "A comprehensive fitness application that uses AI to generate personalized body assessments, nutrition guides, and detailed weekly workout plans based on user input.",
   "requestFramePermissions": [
     "camera"

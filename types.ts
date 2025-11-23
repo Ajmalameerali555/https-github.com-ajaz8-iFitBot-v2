@@ -1,3 +1,4 @@
+
 export interface QuizData {
     id?: string;
     name: string;
@@ -111,7 +112,7 @@ export interface LibraryExercise {
   name: string;
   description: string;
   instructions: string[];
-  videoUrl: string;
+  videoUrl?: string;
   muscleGroup: MuscleGroup;
   equipment: Equipment;
   difficulty: Difficulty;

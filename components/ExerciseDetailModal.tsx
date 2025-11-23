@@ -1,5 +1,6 @@
+
 import React, { useEffect, useRef, useState } from 'react';
-import { X, Check, ChevronDown } from 'lucide-react';
+import { X, Check, ChevronDown, VideoOff } from 'lucide-react';
 import type { LibraryExercise } from '../types';
 
 interface ExerciseDetailModalProps {
@@ -67,17 +68,24 @@ export default function ExerciseDetailModal({ exercise, isOpen, onClose }: Exerc
                 </header>
                 
                 <div className="overflow-y-auto">
-                    <div className="aspect-video bg-black">
-                         <video
-                            key={exercise.id}
-                            src={exercise.videoUrl}
-                            className="w-full h-full object-contain"
-                            autoPlay
-                            loop
-                            controls
-                            muted
-                            playsInline
-                        />
+                    <div className="aspect-video bg-black flex items-center justify-center relative overflow-hidden">
+                        {exercise.videoUrl ? (
+                             <video
+                                key={exercise.id}
+                                src={exercise.videoUrl}
+                                className="w-full h-full object-contain"
+                                autoPlay
+                                loop
+                                controls
+                                muted
+                                playsInline
+                            />
+                        ) : (
+                            <div className="flex flex-col items-center justify-center text-gray-500 p-8">
+                                <VideoOff className="w-16 h-16 mb-4 opacity-50" />
+                                <p className="text-lg font-medium">Video demonstration not available</p>
+                            </div>
+                        )}
                     </div>
                     
                     <div className="p-6">

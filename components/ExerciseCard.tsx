@@ -1,6 +1,7 @@
 
 import React from 'react';
 import type { LibraryExercise } from '../types';
+import { VideoOff } from 'lucide-react';
 
 interface ExerciseCardProps {
     exercise: LibraryExercise;
@@ -26,15 +27,22 @@ export default function ExerciseCard({ exercise, onClick }: ExerciseCardProps) {
             onKeyDown={(e) => (e.key === 'Enter' || e.key === ' ') && onClick(exercise)}
         >
             <div className="relative w-full h-56 bg-black">
-                <video
-                    src={exercise.videoUrl}
-                    className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    aria-hidden="true"
-                />
+                {exercise.videoUrl ? (
+                    <video
+                        src={exercise.videoUrl}
+                        className="absolute inset-0 w-full h-full object-cover transition-transform duration-300 group-hover:scale-110"
+                        autoPlay
+                        loop
+                        muted
+                        playsInline
+                        aria-hidden="true"
+                    />
+                ) : (
+                     <div className="absolute inset-0 w-full h-full flex flex-col items-center justify-center bg-gray-800 text-gray-500">
+                        <VideoOff className="w-8 h-8 mb-2 opacity-50" />
+                        <span className="text-xs font-medium">Video Not Available</span>
+                    </div>
+                )}
                 <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/40 to-transparent"></div>
                 <div className="absolute bottom-0 left-0 right-0 p-4">
                     <h3 className="text-lg font-bold text-white truncate">{exercise.name}</h3>

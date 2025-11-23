@@ -11,7 +11,7 @@ import type { FirebaseUser, UserProfile, QuizData } from '../types';
  */
 export const getUserProfile = async (uid: string): Promise<UserProfile | null> => {
     // FIX: Use v8 compat syntax for document reference and retrieval.
-    const userDocRef = doc(db, 'users', uid);
+    const userDocRef = db.collection('users').doc(uid);
     const userDocSnap = await userDocRef.get();
     if (userDocSnap.exists) {
         const data = userDocSnap.data();
