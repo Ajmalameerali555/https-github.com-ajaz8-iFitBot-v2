@@ -37,17 +37,17 @@ export interface Flag {
 
 export interface ReportData {
     numbers: {
-        current_maintenance_calories: number; // TDEE
+        current_maintenance_calories: number; 
         daily_calorie_deficit_needed: number;
         target_intake_kcal: number;
-        target_burn_per_day_activity: number; // Calories to burn via exercise/movement
+        target_burn_per_day_activity: number; 
     };
     timeline: {
         excess_fat_kg: number;
         weeks_to_goal: number;
         projected_loss_per_week_kg: number;
         is_timeline_realistic: boolean;
-        adjusted_timeline_weeks?: number; // If the user's goal is unsafe, suggest this
+        adjusted_timeline_weeks?: number; 
     };
     nutrition_targets: {
         recommended_calories_kcal: number;
@@ -60,7 +60,7 @@ export interface ReportData {
         estimated_bf_percent: number;
         bf_ideal_band: [number, number];
         bf_status: "below" | "within" | "above";
-        visual_analysis_notes?: string; // Specific findings from image
+        visual_analysis_notes?: string; 
         estimated_tbw_percent: number;
         tbw_typical_band: [number, number];
         tbw_status: "below" | "within" | "above";
@@ -69,7 +69,6 @@ export interface ReportData {
     methodology: string[];
     report_markdown: string;
 }
-
 
 export interface Exercise {
     name: string;
@@ -105,13 +104,11 @@ export interface WorkoutPlan {
     weekly_workouts: WeeklyWorkout[];
 }
 
-// New type for exercise variations
 export interface Variation {
   name: string;
   description: string;
 }
 
-// Types for the Exercise Library
 export type MuscleGroup = 'Chest' | 'Back' | 'Legs' | 'Shoulders' | 'Arms' | 'Core';
 export type Equipment = 'Bodyweight' | 'Dumbbells' | 'Barbell' | 'Kettlebell' | 'Resistance Bands';
 export type Difficulty = 'Beginner' | 'Intermediate' | 'Advanced';
@@ -128,7 +125,6 @@ export interface LibraryExercise {
   variations?: Variation[];
 }
 
-// New types for the Workout Guide Generator with Trainer Review
 export interface AssignedTrainer {
     name: "Athul" | "Athithiya" | "Saieel";
 }
@@ -193,37 +189,34 @@ export interface WorkoutPlanApiResponse {
     signature_line?: string;
 }
 
-// New type for storing pending plans for trainer review
 export interface PendingWorkoutPlan {
-    id: string; // Unique ID, can be a timestamp
-    userEmail: string; // The email used to retrieve the plan
+    id: string; 
+    userEmail: string; 
     userName: string;
     assignedTrainerName: "Athul" | "Athithiya" | "Saieel";
     status: 'pending' | 'approved' | 'rejected';
-    generatedAt: string; // ISO string
-    approvedAt?: string; // ISO string, set on approval
+    generatedAt: string; 
+    approvedAt?: string; 
     planData: WorkoutPlanApiResponse;
-    quizData: QuizData | null; // Added to store the original assessment data
-    trainerNotes?: string; // New field for trainer's message
+    quizData: QuizData | null; 
+    trainerNotes?: string; 
 }
 
-// New type for the trainer chatbot
 export interface ChatMessage {
     role: 'user' | 'model';
     text: string;
 }
 
-// New types for Progress Tracking
 export interface WeightEntry {
-  date: string; // ISO string
+  date: string; 
   weight: number;
 }
 
 export interface PersonalRecordEntry {
-  id: string; // Unique ID, e.g., timestamp
-  date: string; // ISO string
+  id: string; 
+  date: string; 
   exercise: string;
-  value: string; // e.g., "100kg x 5 reps"
+  value: string; 
 }
 
 export interface UserProgress {
@@ -231,7 +224,6 @@ export interface UserProgress {
   personalRecords: PersonalRecordEntry[];
 }
 
-// Type for Firebase User
 export interface FirebaseUser {
   uid: string;
   displayName: string | null;
@@ -239,8 +231,9 @@ export interface FirebaseUser {
   photoURL: string | null;
 }
 
-// New User Profile type for Firestore
 export interface UserProfile extends FirebaseUser {
-  createdAt: string; // ISO string
+  createdAt: string; 
   latestQuizData?: QuizData;
 }
+
+export type AspectRatio = "1:1" | "2:3" | "3:2" | "3:4" | "4:3" | "9:16" | "16:9" | "21:9";

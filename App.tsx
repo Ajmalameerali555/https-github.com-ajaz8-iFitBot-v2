@@ -11,6 +11,7 @@ import TrainerDashboardPage from './pages/TrainerDashboardPage';
 import MyPlanPage from './pages/MyPlanPage';
 import ProgressPage from './pages/ProgressPage';
 import ProfilePage from './pages/ProfilePage';
+import AIStudioPage from './pages/AIStudioPage';
 import ContactSupportIcon from './components/ContactSupportIcon';
 import type { QuizData, FirebaseUser, UserProfile } from './types';
 import { auth } from './services/firebase';
@@ -132,6 +133,7 @@ return (
                             <Route path="/about" element={<AboutPage />} />
                             <Route path="/trainer-login" element={<TrainerLoginPage />} />
                             <Route path="/trainer-dashboard" element={<TrainerDashboardPage />} />
+                            <Route path="/ai-studio" element={<AIStudioPage />} />
                             {/* Add the new protected profile route */}
                             <Route path="/profile" element={<ProtectedRoute><ProfilePage /></ProtectedRoute>} />
                             <Route path="*" element={<Navigate to="/" />} />

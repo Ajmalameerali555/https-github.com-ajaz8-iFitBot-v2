@@ -1,7 +1,6 @@
-
 import React, { useState, useEffect, useContext } from "react";
 import { Link } from "react-router-dom";
-import { FileText, BookOpen, Dumbbell, Scale, Flame, Weight, Building, FileCheck2, TrendingUp, MessageSquare } from "lucide-react";
+import { FileText, BookOpen, Dumbbell, Scale, Flame, Weight, Building, FileCheck2, TrendingUp, MessageSquare, Sparkles } from "lucide-react";
 import { AppContext } from "../App";
 import CalorieChatbot from '../components/CalorieChatbot';
 
@@ -124,6 +123,13 @@ export default function Home() {
                             <p className="text-xs text-gray-500 mt-3">
                                 Don’t have an assessment yet? <Link to="/assessment" className="underline hover:text-lime-400" onClick={(e) => e.stopPropagation()}>Start one in 2 minutes.</Link>
                             </p>
+                        </div>
+                    </Link>
+                    <Link to="/ai-studio" className="group relative">
+                         <div className="w-full h-full p-6 bg-black/50 border border-gray-700 text-white rounded-lg flex flex-col items-center justify-center gap-2 transition-transform group-hover:scale-105 group-hover:border-lime-500">
+                            <Sparkles className="w-8 h-8 text-gray-400 group-hover:text-lime-500" />
+                            <span className="font-semibold">AI Studio</span>
+                            <span className="text-sm text-gray-400">Edit photos & Create art</span>
                         </div>
                     </Link>
                     <Link to="/my-plan" className="group relative">
